@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VocaBuddy — Voice Vocabulary Coach</title>
+<style>
+:root{--ink:#18212f;--muted:#657286;--bg:#f4f7fb;--card:#fff;--accent:#5b63d9;--accent2:#e9eaff;--green:#16845b;--red:#c14d4d}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#f4f7fb,#eef0ff);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);min-height:100vh;display:grid;place-items:center;padding:24px}
+.app{width:min(760px,100%)}header{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}.brand{font-weight:800;font-size:20px;letter-spacing:-.5px}.brand span{color:var(--accent)}.tag{font-size:12px;color:var(--muted);background:#fff;padding:8px 12px;border-radius:99px}
+.card{background:var(--card);border:1px solid #e5e9f2;border-radius:24px;padding:clamp(22px,5vw,42px);box-shadow:0 18px 55px #25345b12}
+.eyebrow{text-transform:uppercase;letter-spacing:1.5px;font-size:11px;font-weight:800;color:var(--accent)}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px}.progress{height:7px;background:#edf0f6;border-radius:20px;overflow:hidden;margin:12px 0 30px}.bar{height:100%;width:0;background:var(--accent);transition:width .3s}
+.word{text-align:center;font-size:clamp(38px,8vw,58px);font-weight:850;letter-spacing:-2px;margin:10px 0 4px}.phonetic{text-align:center;color:var(--muted);font-size:15px}.meaning{text-align:center;font-size:18px;margin:22px auto 8px;max-width:540px;line-height:1.5}.example{background:#f7f8fc;border-radius:14px;padding:15px 18px;color:#526075;text-align:center;line-height:1.5;margin:18px 0 24px}
+.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}.btn{border:0;border-radius:12px;padding:12px 17px;font-size:14px;font-weight:750;cursor:pointer;transition:.15s}.btn:disabled{opacity:.5;cursor:not-allowed}.primary{background:var(--accent);color:white}.secondary{background:var(--accent2);color:var(--accent)}.plain{background:#f1f3f7;color:#354155}
+.practice{margin-top:28px;border-top:1px solid #edf0f5;padding-top:24px}.practice h2{font-size:17px;margin:0 0 7px}.hint{font-size:13px;color:var(--muted);margin:0 0 15px}.answer{width:100%;border:1px solid #dce2ed;border-radius:12px;padding:14px;font:inherit;outline:none}.answer:focus{border-color:var(--accent);box-shadow:0 0 0 3px #5b63d91a}.feedback{min-height:25px;margin:12px 0 0;font-size:14px;font-weight:650}.feedback.good{color:var(--green)}.feedback.bad{color:var(--red)}.foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:22px;color:var(--muted);font-size:12px}.mic{display:inline-flex;align-items:center;gap:8px}.status{color:var(--muted);font-size:12px;text-align:center;margin-top:10px;min-height:18px}
+@media(max-width:480px){.tag{display:none}.foot{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div class="brand">✦ Voca<span>Buddy</span></div><div class="tag">A tiny voice-powered vocabulary coach</div></header>
+<section class="card">
+ <div class="topline"><div class="eyebrow">Daily vocabulary practice</div><div id="count" class="eyebrow">Word 1 of 5</div></div>
+ <div class="progress"><div class="bar" id="bar"></div></div>
+ <div class="word" id="word">Curious</div>
+ <div class="phonetic" id="phonetic">/ˈkjʊəriəs/ · adjective</div>
+ <div class="meaning" id="meaning">Eager to know or learn something.</div>
+ <div class="example" id="example">“The curious student asked thoughtful questions.”</div>
+ <div class="actions">
+  <button class="btn secondary" id="speakWord">🔊 Hear the word</button>
+  <button class="btn plain" id="speakExample">▶ Hear example</button>
+ </div>
+ <div class="practice">
+  <h2>Try saying it aloud</h2>
+  <p class="hint">Tap the microphone and use the word in a short sentence. You can also type your sentence.</p>
+  <input class="answer" id="answer" placeholder="Example: I am curious about space." aria-label="Your sentence">
+  <div class="actions" style="margin-top:12px">
+   <button class="btn primary mic" id="mic">🎙️ Start speaking</button>
+   <button class="btn secondary" id="check">Check my sentence</button>
+  </div>
+  <div class="status" id="status" aria-live="polite">Microphone works in supported browsers; allow microphone access when asked.</div>
+  <div class="feedback" id="feedback" aria-live="polite"></div>
+ </div>
+ <div class="foot"><span>Learn meaning · Listen · Speak · Practise</span><button class="btn plain" id="next">Next word →</button></div>
+</section>
+</main>
+<script>
+const words=[
+ {word:"Curious",phonetic:"/ˈkjʊəriəs/ · adjective",meaning:"Eager to know or learn something.",example:"“The curious student asked thoughtful questions.”"},
+ {word:"Resilient",phonetic:"/rɪˈzɪliənt/ · adjective",meaning:"Able to recover quickly after difficulty.",example:"“She stayed resilient after the setback.”"},
+ {word:"Concise",phonetic:"/kənˈsaɪs/ · adjective",meaning:"Giving a lot of information clearly in a few words.",example:"“Please keep your presentation concise.”"},
+ {word:"Diligent",phonetic:"/ˈdɪlɪdʒənt/ · adjective",meaning:"Showing care and steady effort in your work.",example:"“He is diligent about checking every detail.”"},
+ {word:"Adapt",phonetic:"/əˈdæpt/ · verb",meaning:"To change your approach to suit a new situation.",example:"“Good teams adapt when priorities change.”"}
+];
+let index=0,recognition=null;
+const $=id=>document.getElementById(id);
+function render(){const w=words[index];$("word").textContent=w.word;$("phonetic").textContent=w.phonetic;$("meaning").textContent=w.meaning;$("example").textContent=w.example;$("count").textContent=`Word ${index+1} of ${words.length}`;$("bar").style.width=`${(index+1)/words.length*100}%`;$("answer").value="";$("feedback").textContent="";$("feedback").className="feedback";$("status").textContent="Microphone works in supported browsers; allow microphone access when asked."}
+function speak(text){if(!("speechSynthesis" in window)){ $("status").textContent="Speech playback is not supported in this browser.";return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=.88;speechSynthesis.speak(u)}
+$("speakWord").onclick=()=>speak(words[index].word);
+$("speakExample").onclick=()=>speak(words[index].example.replace(/[“”]/g,""));
+$("next").onclick=()=>{index=(index+1)%words.length;render()};
+$("check").onclick=()=>{const text=$("answer").value.trim();const f=$("feedback");if(!text){f.textContent="Write or say a sentence first.";f.className="feedback bad";return;}const hasWord=text.toLowerCase().includes(words[index].word.toLowerCase());if(hasWord){f.textContent="Great job! You used the vocabulary word in context. ✨";f.className="feedback good";}else{f.textContent=`Good attempt. Try using “${words[index].word.toLowerCase()}” in your sentence.`;f.className="feedback bad";}};
+const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+$("mic").onclick=()=>{
+ if(!SpeechRecognition){$("status").textContent="Voice input is not available here. Try Chrome or type your sentence instead.";return;}
+ if(recognition){recognition.stop();recognition=null;return;}
+ recognition=new SpeechRecognition();recognition.lang="en-US";recognition.interimResults=false;recognition.maxAlternatives=1;
+ $("status").textContent="Listening… speak now.";
+ recognition.onresult=e=>{$("answer").value=e.results[0][0].transcript;$("status").textContent="Voice captured. Tap “Check my sentence”.";recognition=null;};
+ recognition.onerror=e=>{$("status").textContent=`Microphone issue: ${e.error}. You can type your sentence instead.`;recognition=null;};
+ recognition.onend=()=>{if(recognition){recognition=null;if($("status").textContent==="Listening… speak now.")$("status").textContent="Voice input ended."; }};
+ recognition.start();
+};
+render();
+</script>
+</body>
+</html>
